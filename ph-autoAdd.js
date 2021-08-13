@@ -1,17 +1,25 @@
 // ==UserScript==
 // @name         PH - AutoAdd
 // @namespace    http://tampermonkey.net/
-// @version      0.3
+// @version      0.4
 // @description  try to take over the world!
 // @author       triplecheeze+ant
 // @match        *://*.pornhub.com/user/search*
 // @grant        none
 // ==/UserScript==
 
-
+// -color - КОЛІР -----  ЛС --- ПІДПИСАНІ --- ДІЯ ------------------------------ функції ----------
+// -|-------|------------|------|-------------|----------------------------------|-----------------
+// "red"    ЧЕРВОНИЙ     так    хз            ВИДАЛЯЄМО!
+// "orange" ПОМАРАНЧЕВИЙ ні     так           ВИДАЛЯЄМО!   (потім пишемо в ЛС)
+// "green"  ЗЕЛЕНИЙ      ні     ні            ПІДПИСУЄМОСЬ (потім пишемо в ЛС)
+// "white"  БІЛИЙ        хз     хз            внутрішні операції
+// "blue"   СИНІЙ        ***    ***           *** щось ***
+// "orange" ПОМАРАНЧЕВИЙ ***    ***           *** щось ***
 
 window.onload = function(){
     sleep(10);
+    RUN3();
     startA('none');
     startA('block');
     //startB('none');
@@ -19,16 +27,20 @@ window.onload = function(){
     startC('block');
     startDE();
     startF();
-    startG();
-    startH();
+    // G - видалення БІЛИХ
+    // закоментовано при старті, бо викликається зі скрипта, а якщо викликати при старті, то дає помилку DOM дерева
+    // startG();
     startR0();
-    startR1();
+    // R1 = видалити рекламу НАД підвалом (не видаляти рекламу, і тримати закоментованим цей запит - щоб реклама показувалась, бо заблокують аккаунт!)
+    // startR1();
     startR2();
-    RUN3();
+
     //deleteOldModalWindowUser();
     //elementModalWindowUser(id_ph);
 
 };
+
+
 
 
 /* ################################################################################################### */
@@ -54,7 +66,7 @@ var myMessage = "У вас есть запрос на дружбу от TTS AUDI
 // ПОВІДОМЛЕННЯ: при підписці - ми НЕ ПИШИМО ПОВІДОМЛЕНЬ!
 var myMessage2 = "";
 // час затримки, мінімально 10сек (=10000мс), оптимально 25сек+
-var delay = 1000;
+var delay = 100;
 var url = "/user/friend_add_json?id=";
 var url1 = "/user/friend_add_json?id=";
 var url2 = "/user/subscribe_add_json?id=";
@@ -90,11 +102,11 @@ function RUN3() {
     'use strict';
     count = 0;
     started = false;
-    var node = document.createElement("button");
-    var node2 = document.createElement("button");
+    var node = document.createElement('button');
+    var node2 = document.createElement('button');
     // початковий текст на кнопці
-    var nodeText = document.createTextNode("ЗУПИНЕНО Auto Add");
-    var node2Text = document.createTextNode("СТАТУС");
+    var nodeText = document.createTextNode('ЗУПИНЕНО Auto Add');
+    var node2Text = document.createTextNode('СТАТУС');
     node.appendChild(nodeText);
     node2.appendChild(node2Text);
     node.classList.add("orangeButton");
@@ -103,36 +115,38 @@ function RUN3() {
     node2.setAttribute("id", "node2");
     node.type = "button";
     node2.type = "button";
-    document.getElementsByClassName("searchActions")[0].appendChild(node);
-    document.getElementsByClassName("searchActions")[0].appendChild(node2);
-    window.document.getElementsByClassName("searchActions")[0].appendChild(node2).style.background='white';
+    document.getElementsByClassName('searchActions')[0].appendChild(node);
+    document.getElementsByClassName('searchActions')[0].appendChild(node2);
+    window.document.getElementsByClassName('searchActions')[0].appendChild(node2).style.background='white';
     var enabled = localStorage.getItem('autoAdd');
-    if(enabled != "true") {
+    if(enabled != 'true') {
         localStorage.setItem('autoAdd', false);
     }else{
         var count = 0;
-        document.getElementById("autoadd").innerHTML = "ПРАЦЮЄ auto add";
+        document.getElementById('autoadd').innerHTML = 'ПРАЦЮЄ auto add';
         started = true;
-        console.log("### Створили кнопку в інтенрфейсі");
+        console.log('### Створили кнопку в інтенрфейсі');
         // наступний рядок, робить команду автостарт при умові що перед рефрешем було включено.
         start();
     }
     var btn = document.getElementById('autoadd');
-    btn.addEventListener("click", toggleAdd, false);
+    btn.addEventListener('click', toggleAdd, false);
     function toggleAdd(){
-        if(localStorage.getItem('autoAdd') === "true"){
-            console.log("### ВИМИКАЄМО  autoAdd...");
+        if(localStorage.getItem('autoAdd') === 'true'){
+            console.log('### autoAdd... ВИМИКАЄМО  ');
             localStorage.setItem('autoAdd', false);
-            document.getElementById("autoadd").innerHTML = "ЗУПИНЕНО";
-            window.document.getElementsByClassName("searchActions")[0].appendChild(node2).style.background='white';
+            document.getElementById('autoadd').innerHTML = 'ЗУПИНЕНО';
+            window.document.getElementsByClassName('searchActions')[0].appendChild(node2).style.background='white';
+            window.document.getElementsByClassName('searchActions')[0].appendChild(node2).innerHTML=(localStorage.idph,' ЗУПИНЕНО')
             started = false;
         }else{
-            console.log("### ЗАПУСКАЄМО autoAdd...");
+            console.log('### autoAdd... ЗАПУСКАЄМО');
             localStorage.setItem('autoAdd', true);
             document.getElementById("autoadd").innerHTML = "ПРАЦЮЄ";
             window.document.getElementsByClassName("searchActions")[0].appendChild(node2).style.background='white';
+            window.document.getElementsByClassName('searchActions')[0].appendChild(node2).innerHTML=(localStorage.idph,' ПРАЦЮЄ')
             started = true;
-            console.log("### ТИПУ ВІДПРАЦЮВАЛО...");
+            console.log('### autoAdd... ВІДПРАЦЮВАЛО');
             sleep(3);
             start();
             // ТИПУ ВІДПРАВЛЯЄМО ЗАПИТ - ЗРОБЛЮ ТИПУ УСПІШНУ ЕМУЛЯЦІЮ В КОНСОЛЬ
@@ -146,28 +160,34 @@ function RUN3() {
 
 /* ################################################################################################### */
 // START - СПРОБА ПЕРЕПИСАТИ НА МІЙ ФОРМАТ - не вдалась
-    // дана функція працює корректно ЛИШЕ всережині материнської функції!
+    // дана функція працює корректно ЛИШЕ всередині материнської функції!
     function start(){
-        console.log("004 start() ### Отримуємо лінк на Юзера");
-        // ЦИКЛ вдя версії v02 :: var loop = setInterval(function(){},delay);
+        console.log('004 start() ### Отримуємо лінк на Юзера');
+        // ЦИКЛ для версії v02 :: var loop = setInterval(function(){},delay);
+        window.document.getElementsByClassName('searchActions')[0].appendChild(node2).style.background='white';
+        window.document.getElementsByClassName('searchActions')[0].appendChild(node2).innerHTML=(localStorage.idph,' 004 Отримуємо лінк на Юзера')
         var loop = setInterval(function(){
             if(started === false){
                 console.log("005 start() ### Перевірка на те чи ВИМКНЕНО кнопку");
                 console.log("006 start() ### КНОПКУ ВИМКНЕНО!");
                 // Перевірка на те чи ВИМКНЕНО кнопку
                 // якщо ми "очищуємо" інтервал, то виконання цикла - зупиняється!
-                window.document.getElementsByClassName("searchActions")[0].appendChild(node2).style.background='white';
+                window.document.getElementsByClassName('searchActions')[0].appendChild(node2).style.background='white';
+                window.document.getElementsByClassName('searchActions')[0].appendChild(node2).innerHTML=(localStorage.idph,' 006 КНОПКУ ВИМКНЕНО')
                 clearInterval(loop);
             }else if(count === _users.length){
-                console.log("007 start() ### Перевірка на те, чи закінчився вже ВЕСЬ список, якщо закінчився, то автоматично клікається кнопка _Наступна_Сторінка_");
+                console.log('007 start() ### Перевірка на те, чи закінчився вже ВЕСЬ список, якщо закінчився, то автоматично клікається кнопка _Наступна_Сторінка_');
                 // Перевірка на те, чи закінчився вже ВЕСЬ список, якщо закінчився, то автоматично клікається кнопка "Наступна Сторінка"
+                window.document.getElementsByClassName('searchActions')[0].appendChild(node2).style.background='white';
+                window.document.getElementsByClassName('searchActions')[0].appendChild(node2).innerHTML=(localStorage.idph,' 008 список ЗАКІНЧИВСЯ. Переходимо на наступну сторінку')
                 count = 0;
-                console.log("008 start() ###"+iteration+"### Переходимо на наступну сторінку");
-                document.getElementsByClassName("page_next")[0].childNodes[0].click();
+                console.log('008 start() ###'+iteration+'### Переходимо на наступну сторінку');
+                document.getElementsByClassName('page_next')[0].childNodes[0].click();
             }else{
-                window.document.getElementsByClassName("searchActions")[0].appendChild(node2).style.background='white';
+                window.document.getElementsByClassName('searchActions')[0].appendChild(node2).style.background='white';
+                window.document.getElementsByClassName('searchActions')[0].appendChild(node2).innerHTML=(localStorage.idph,' 010 ОТРИМАННЯ цифрового ID Юзера')
                 // ОТРИМАННЯ цифрового ID Юзера (щоб потім можна було зробити запит).
-                console.log("010 start() ### ІТЕРАЦІЯ ",count," з " + _users.length);
+                console.log('010 start() ### ІТЕРАЦІЯ ',count,' з ' + _users.length);
                 var iteration="("+count+"/"+_users.length+")"
                 localStorage.setItem('_lsIteration', iteration);
                 console.log("011 start() ###",iteration,"###");
@@ -177,35 +197,52 @@ function RUN3() {
                 // власне idph це перший елемент, його ІД з DOM
                 var idph = _users[0].getAttribute("data-userid");
                 localStorage.setItem('idph',idph);
-//localStorage.setItem('_lsPHdbIdph', idph);
-                  console.log("100 start() ###",iteration,"### User ID=" + localStorage.idph + " знайдено! (1)" );
+                //sleep (10200);
+                //localStorage.setItem('_lsPHdbIdph', idph);
+                  console.log('100 start() ###',iteration,'### User ID=' + localStorage.idph + ' знайдено! (1)' );
                   // обовязково видаляємо старі елементи (якщо вони є!)
-                  console.log("200 start() ###",iteration,"### User ID=" + localStorage.idph + " знайдено! (2) - обовязково видаляємо старі елементи");
+                  console.log('200 start() ###',iteration,'### User ID=' + localStorage.idph + ' знайдено! (2) - обовязково видаляємо старі елементи');
                   // deleteOldModalWindowUser();
                   // додаємо елемент з користувачем якого треба дослідити, чи вже на нього підписані
                   console.log("300 start() ###",iteration,"### User ID=" + localStorage.idph + " знайдено! (3) - додаємо елемент з користувачем якого треба дослідити, чи вже на нього підписані");
-                  window.document.getElementsByClassName("searchActions")[0].appendChild(node2).style.background='white';
+                  window.document.getElementsByClassName('searchActions')[0].appendChild(node2).style.background='white';
+                  window.document.getElementsByClassName('searchActions')[0].appendChild(node2).innerHTML=(localStorage.idph,'fn:elementModalWindowUser() - чекаємо 5 сек на USER ID від сервера')
+                  // якщо зменшити час очікування, то є ймовірність потрапити на БАН АККАУНТА, бо вони зможуть просікти що це скрипт.
+                  // sleep (10211);
                   elementModalWindowUser(idph);
                   // console.log("350 start() ###",iteration,"### User ID=" + idph + " знайдено! (3) - noneToBlock() - START");
-                  //noneToBlock();
+                  // noneToBlock();
                   // console.log("360 start() ###",iteration,"### User ID=" + idph + " знайдено! (3) - noneToBlock() - END");
+                  //
                   console.log("400 start() ###",iteration,"### User ID=" + localStorage.idph + " знайдено! (4) - перевіряємо чи підписані на цього користувача, і видаляємо/підписуємось");
+                  window.document.getElementsByClassName('searchActions')[0].appendChild(node2).innerHTML=(localStorage.idph,'400 fn:subscribe() = START')
                   subscribe(url,idph,_token);
+                  window.document.getElementsByClassName('searchActions')[0].appendChild(node2).innerHTML=(localStorage.idph,'499 fn:subscribe() = END')
+                  //
                   console.log("500 start() ###",iteration,"### User ID=" + localStorage.idph + " знайдено! (5) - deleteOldModalWindowUser(); = START");
+                  window.document.getElementsByClassName('searchActions')[0].appendChild(node2).style.background='white';
+                  window.document.getElementsByClassName('searchActions')[0].appendChild(node2).innerHTML=(localStorage.idph,' 500 fn:deleteOldModalWindowUser() = START ')
                   deleteOldModalWindowUser();
+                  window.document.getElementsByClassName('searchActions')[0].appendChild(node2).style.background='white';
+                  window.document.getElementsByClassName('searchActions')[0].appendChild(node2).innerHTML=(localStorage.idph,' 599 fn:deleteOldModalWindowUser() = END ')
                   console.log("599 start() ###",iteration,"### User ID=" + localStorage.idph + " знайдено! (5) - deleteOldModalWindowUser(); = END");
+                  //
 
                 xhr.onreadystatechange = function() {
                     if(xhr.readyState == 4){
                         var res = JSON.parse(xhr.responseText);
                         if(res.success == "SPAM"){
-                            sleep(800);
-                            console.error("start() ###",iteration,"### INCREASE THE AUTO ADD DELAY,  REASON : SPAM // ТРЕБА ЗБІЛЬШИТИ ЧАС ЗАТРИМКИ, ПРИЧИНА: SPAM");
-                            sleep(120000);
+                            sleep(235);
+                            window.document.getElementsByClassName('searchActions')[0].appendChild(node2).style.background='white';
+                            window.document.getElementsByClassName('searchActions')[0].appendChild(node2).innerHTML=(localStorage.idph,' чекаємо 300 сек - ПРИЧИНА: SPAM')
+                            console.error("start() ###",iteration,"### INCREASE THE AUTO ADD DELAY,  REASON : SPAM // ТРЕБА ЗБІЛЬШИТИ ЧАС ЗАТРИМКИ (зараз 180/300 сек), ПРИЧИНА: SPAM");
+                            sleep(300000);
                         }else{
                             console.log("900 start() ###",iteration,"### (2-А) ### User ID=:" + localStorage.idph + " знайдено! ");
                             // обовязково видаляємо старі елементи
                             console.log("901 start() ###",iteration,"### (2-А) ### deleteOldModalWindowUser()");
+                            window.document.getElementsByClassName('searchActions')[0].appendChild(node2).style.background='white';
+                            window.document.getElementsByClassName('searchActions')[0].appendChild(node2).innerHTML=(localStorage.idph,' 901 fn:deleteOldModalWindowUser() = START ')
                             deleteOldModalWindowUser();
                             // додаємо елемент з користувачем якого треба дослідити, чи вде на нього підписані
                             console.log("902 start() ###",iteration,"### (2-А) ### elementModalWindowUser(_id)");
@@ -215,20 +252,26 @@ function RUN3() {
                             subscribe();
                             // обовязково видаляємо старі елементи
                             console.log("904 start() ###",iteration,"### (2-А) ### deleteOldModalWindowUser()");
+                            window.document.getElementsByClassName('searchActions')[0].appendChild(node2).innerHTML=(localStorage.idph,' 904 fn:deleteOldModalWindowUser() = START ')
                             deleteOldModalWindowUser();
+                            window.document.getElementsByClassName('searchActions')[0].appendChild(node2).innerHTML=(localStorage.idph,' 904 fn:deleteOldModalWindowUser() = END ')
                         }
+                        window.document.getElementsByClassName('searchActions')[0].appendChild(node2).innerHTML=(localStorage.idph,' 905 sleep ')
                         sleep(905);
                     }
+                    window.document.getElementsByClassName('searchActions')[0].appendChild(node2).innerHTML=(localStorage.idph,' 906 sleep ')
                     sleep(906);
                 };
                 // підписуємось на користувача!
+                window.document.getElementsByClassName('searchActions')[0].appendChild(node2).innerHTML=(localStorage.idph,' fn:subscribe ')
                 subscribe(url,idph,_token);
                 // збільшуємо значення лічильника на +1
                 count++
                 localStorage.setItem('_lScount', count);
                 var lScount = localStorage.getItem('_lScount');
             }
-// ЦИКЛ вдя версії v02 :: var loop = setInterval(function(){},delay);
+// ЦИКЛ для версії v02 :: var loop = setInterval(function(){},delay);
+        // delay був 1000 зараз поставив 300 - щоб швидше опрацьовувало тих хто вже в ЛС
         },delay);
     }
     var iteration = localStorage.getItem('_lsIteration');
@@ -238,6 +281,8 @@ function RUN3() {
 
 // ########## START - ЗАВАНТАЖЕННЯ БЛОКА МОДАЛЬНОГО ВІКНА
 function elementModalWindowUser(idph){
+    window.document.getElementsByClassName('searchActions')[0].appendChild(node2).style.background='white';
+    window.document.getElementsByClassName('searchActions')[0].appendChild(node2).innerHTML=(localStorage.idph,'303 fn:elementModalWindowUser() - БЛОК МОДАЛЬНОГО ВІКНА START')
     console.log('303 elementModalWindowUser(idph) ### START ###');
     // elementModalWindowUser(436819712)
     // https://rt.pornhub.com/user/hover?id=436819712
@@ -262,6 +307,8 @@ function elementModalWindowUser(idph){
         // нам нужен код 200 это нормальный ответ сервера, 401 файл не найден, 500 сервер дал ошибку и прочее...
         // sleep(304);
         if (request.readyState === 4 && request.status === 200) {
+            window.document.getElementsByClassName('searchActions')[0].appendChild(node2).style.background='white';
+            window.document.getElementsByClassName('searchActions')[0].appendChild(node2).innerHTML=(localStorage.idph,'305 fn:elementModalWindowUser() - РЕКВЕСТ модального вікна ВДАЛИЙ')
             console.log("305 elementModalWindowUser(idph) ### РЕКВЕСТ модального вікна ВДАЛИЙ");
             // выводим в консоль то что ответил сервер
             // ЗАКОМЕНТУВАТИ наступний рядок ЯКЩО ВЖЕ ПРОДАКШЕНІ!
@@ -290,31 +337,39 @@ function elementModalWindowUser(idph){
     console.log("301 elementModalWindowUser(idph) ### виконуємо запит");
     request.send();
     // УВАГА!
-    // технологічна пауще не менше 5000, бо від сервера не встигає надійти відповідь, і це ламає алгоритм!
-    // sleep(5000);
+    // технологічна пауза не менше 5000, бо від сервера не встигає надійти відповідь, і це ламає алгоритм!
+    sleep(10000);
     console.log('349 elementModalWindowUser(idph) ### END ###');
 };
 sleep(1);
 // наступний рядок потрібен для відладки - його можна буде видалити якщо ВСЕ ПРАЦЮЄ!
     function noneToBlock() {
         console.log('351 noneToBlock() ### START');
+        window.document.getElementsByClassName('searchActions')[0].appendChild(node2).style.background='white';
+        window.document.getElementsByClassName('searchActions')[0].appendChild(node2).innerHTML=(localStorage.idph,'351 fn:noneToBlock()')
         var idph = localStorage.idph;
         if (window.document.getElementById('avatarPopOverId'+idph)) {
-            console.log('352 noneToBlock() ### якщо є елемент avatarPopOverId то змінюємо його кольори на синій');
+            console.log('352 noneToBlock() ### якщо є елемент avatarPopOverId то змінюємо його кольори на ЗЕЛЕНИЙ - green');
             window.document.getElementById('avatarPopOverId'+idph).style.display='block';
-            window.document.getElementById('avatarPopOverId'+idph).style.background='blue';
+            window.document.getElementById('avatarPopOverId'+idph).style.background='green';
             // фарбуємо КНОПКУ2
-            window.document.getElementsByClassName("searchActions")[0].appendChild(node2).style.background='blue';
+            window.document.getElementsByClassName('searchActions')[0].appendChild(node2).style.background='green';
+            window.document.getElementsByClassName('searchActions')[0].appendChild(node2).innerHTML=(localStorage.idph,'352 fn:noneToBlock()')
             console.log('353 noneToBlock() ### БАЧИТЬ елементів для опрацювання [',window.document.getElementsByClassName("avatarPopOver").length,'] ');
         } else {
             console.log('354 noneToBlock() ### АБО ::: ЩОСЬ ПІШЛО НЕ ТАК, БО МУСИТЬ БУТИ =1. ТОЖ DOM ЧОМУСЬ НЕ ЗЧИТАВСЯ ПОВНІСТЮ - ТРЕБА ШУКАТИ ПОМИЛКИ!');
             console.log('355 noneToBlock() ### АБО ::: ВАРТО ЗАЧЕКАТИ ПАРУ ЦИКЛІВ, ПОКИ СКРИПТ НЕ ПРОГРУЗИТЬ ВСІ ПАРАМЕТРИ І ВИЙДЕ В РЕЖИМ ПРОДАКШН');
             console.log('356 noneToBlock() ### АБО ::: якщо НЕМА елемента avatarPopOverId, і з вигляду все працює правильно, - то видаляємо ВСІ непотрібні попапи');
-            console.log('357 noneToBlock() ### ВЖУХ! І МИ ВИДАЛИЛИ СТАРІ ПОПАПИ функцією deleteOldModalWindowUser()');
             // фарбуємо КНОПКУ2
-            window.document.getElementsByClassName("searchActions")[0].appendChild(node2).style.background='white';
+            window.document.getElementsByClassName('searchActions')[0].appendChild(node2).style.background='white';
+            window.document.getElementsByClassName('searchActions')[0].appendChild(node2).innerHTML=(localStorage.idph,'fn:deleteOldModalWindowUser() - видаляємо СТАРІ ПОПАПИ')
             deleteOldModalWindowUser();
+            window.document.getElementsByClassName('searchActions')[0].appendChild(node2).style.background='white';
+            window.document.getElementsByClassName('searchActions')[0].appendChild(node2).innerHTML=(localStorage.idph,'fn:deleteOldModalWindowUser() - СТАРІ ПОПАПИ видалили')
+            console.log('357 noneToBlock() ### ВЖУХ! І МИ ВИДАЛИЛИ СТАРІ ПОПАПИ функцією deleteOldModalWindowUser()');
         }
+        window.document.getElementsByClassName('searchActions')[0].appendChild(node2).style.background='white';
+        window.document.getElementsByClassName('searchActions')[0].appendChild(node2).innerHTML=(localStorage.idph,'351 fn:noneToBlock() - END')
         console.log('358 noneToBlock() ### END');
     };
 // ########## END - ЗАВАНТАЖЕННЯ БЛОКА МОДАЛЬНОГО ВІКНА
@@ -342,8 +397,10 @@ function deleteExist() {
 
 // ########## START - ВИДАЛЕННЯ БЛОКА/БЛОКІВ ПОПЕРЕДНІХ МОДАЛЬНИХ ВІКОН
 function deleteOldModalWindowUser() {
+    window.document.getElementsByClassName('searchActions')[0].appendChild(node2).style.background='white';
+    window.document.getElementsByClassName('searchActions')[0].appendChild(node2).innerHTML=(localStorage.idph,'fn:deleteOldModalWindowUser() = START')
     // var idph = localStorage.getItem('idph');
-    // перез збереженням - видаляэмо ВСІ ІСНУЮЧІ ОБЄКТИ --> class="avatarPopOver" - що розміщені перед закриваючим BODY
+    // перез збереженням - видаляємо ВСІ ІСНУЮЧІ ОБЄКТИ --> class="avatarPopOver" - що розміщені перед закриваючим BODY
     // document.getElementsByClassName('avatarPopOver')[0].remove();
     // дізнаємось поточну кількість існуючих:
     var elementPopOver = document.getElementsByClassName('avatarPopOver');
@@ -358,6 +415,8 @@ function deleteOldModalWindowUser() {
         // видаляємо усі елементи окрім того що має ID
         // document.getElementsByClassName('user-flag large-avatar')[a].parentNode.style.background='red';
     };
+    window.document.getElementsByClassName('searchActions')[0].appendChild(node2).style.background='white';
+    window.document.getElementsByClassName('searchActions')[0].appendChild(node2).innerHTML=(localStorage.idph,'510 fn:deleteOldModalWindowUser() = END')
     console.log("510 deleteOldModalWindowUser() ### ВИДАЛЕНО " + elementPopOverLength + " елементів СТАРИХ МОДАЛЬНИХ ВІКОН");
 };
 // ########## END - ВИДАЛЕННЯ БЛОКА/БЛОКІВ ПОПЕРЕДНІХ МОДАЛЬНИХ ВІКОН
@@ -367,29 +426,40 @@ function deleteOldModalWindowUser() {
 // https://qna.habr.com/q/488804
 // [ idph, Username , Lang , Subscribe , Frend ]
 function lsSet(idph){
+    window.document.getElementsByClassName('searchActions')[0].appendChild(node2).innerHTML=(localStorage.idph,'function lsSet(idph)')
     // смикаємо змінну з LS
     idph = localStorage.idph;
     // створюємо змінну, щоб можна було її підставляти як параметр (бо "+" ламає запит).
     var lsPHdb_idph = 'lsPHdb_'+idph
     var username = window.document.getElementsByClassName('username')[0].innerText
-    var lsString = {'idph':idph,'username':username,'lang':'ru','subs':'true','frend':'na'}
+    // LONG ## повна версія змінної LS
+    // var lsString = {'idph':idph,'username':username,'lang':'ru','subs':'true','frend':'na'}
+    // SHORT ## коротка версія змінної LS
+    var lsString = {'idph':idph,'username':username}
     localStorage.setItem(lsPHdb_idph,JSON.stringify(lsString));
+    // SHORT ## коротка версія
     localStorage.setItem('_lsPHdbIdph',idph);
     localStorage.setItem('_lsPHdbUsername',username);
-    localStorage.setItem('_lsPHdbLang','ru');
-    localStorage.setItem('_lsPHdbSubs','true');
-    localStorage.setItem('_lsPHdbFrend','na');
+    // LONG ## повна версія (розкоментувати)
+    //localStorage.setItem('_lsPHdbLang','ru');
+    //localStorage.setItem('_lsPHdbSubs','true');
+    //localStorage.setItem('_lsPHdbFrend','na');
     localStorage._lsPHdbIdph;
     localStorage._lsPHdbUsername;
-    localStorage._lsPHdbLang;
-    localStorage._lsPHdbSubs;
-    localStorage._lsPHdbFrend;
+    // LONG ## повна версія (розкоментувати)
+    //localStorage._lsPHdbLang;
+    //localStorage._lsPHdbSubs;
+    //localStorage._lsPHdbFrend;
     console.log('lsSet() ### створили LS')
-    console.log('lsSet() ###',localStorage._lsPHdbIdph,'/',localStorage._lsPHdbUsername,'/',localStorage._lsPHdbLang,'/',localStorage._lsPHdbSubs,'/',localStorage._lsPHdbFrend,' ')
+    console.log('lsSet() ###',localStorage._lsPHdbIdph,'/',localStorage._lsPHdbUsername,' ')
+    //console.log('lsSet() ###',localStorage._lsPHdbIdph,'/',localStorage._lsPHdbUsername,'/',localStorage._lsPHdbLang,'/',localStorage._lsPHdbSubs,'/',localStorage._lsPHdbFrend,' ')
 };
 // https://qna.habr.com/q/488804
 // [ idph, Username , Lang , Subscribe , Frend ]
+// #### функція створення АКТИВНОЇ (поточної) змінної ID елемента - відповідно до парсингу JSON коду  на сторінці.
 function lsGet(idph){
+    window.document.getElementsByClassName('searchActions')[0].appendChild(node2).style.background='white';
+    window.document.getElementsByClassName('searchActions')[0].appendChild(node2).innerHTML=(localStorage.idph,'fn:lsGet() - START')
     // смикаємо змінну з LS
     idph = localStorage.idph;
     // створюємо змінну, щоб можна було її підставляти як параметр (бо "+" ламає запит).
@@ -409,41 +479,60 @@ function lsGet(idph){
         // console.log('lsGet() ### ',lsPHdb.frend);
         localStorage.setItem('_lsPHdbidph',lsPHdbIdph);
         localStorage.setItem('_lsPHdbUsername',lsPHdbUsername);
-        localStorage.setItem('_lsPHdbLang',lsPHdbLang);
-        localStorage.setItem('_lsPHdbSubs',lsPHdbSubs);
-        localStorage.setItem('_lsPHdbFrend',lsPHdbFrend);
+        // LONG ## повна версія (розкоментувати)
+        //localStorage.setItem('_lsPHdbLang',lsPHdbLang);
+        //localStorage.setItem('_lsPHdbSubs',lsPHdbSubs);
+        //localStorage.setItem('_lsPHdbFrend',lsPHdbFrend);
     }
-    console.log('lsGet() ### VAR ##',lsPHdbIdph,'#',lsPHdbUsername,'#',lsPHdbLang,'#',lsPHdbSubs,'#',lsPHdbFrend,'#')
-    console.log('lsGet() ### LS ###',localStorage._lsPHdbIdph,'#',localStorage._lsPHdbUsername,'#',localStorage._lsPHdbLang,'#',localStorage._lsPHdbSubs,'#',localStorage._lsPHdbFrend,'#')
+    // SHORT ## коротка версія
+    console.log('lsGet() ### VAR ##',lsPHdbIdph,'#',lsPHdbUsername,'#')
+    console.log('lsGet() ### LS ###',localStorage._lsPHdbIdph,'#',localStorage._lsPHdbUsername,'#')
+    // LONG ## повна версія (розкоментувати)
+    //console.log('lsGet() ### VAR ##',lsPHdbIdph,'#',lsPHdbUsername,'#',lsPHdbLang,'#',lsPHdbSubs,'#',lsPHdbFrend,'#')
+    //console.log('lsGet() ### LS ###',localStorage._lsPHdbIdph,'#',localStorage._lsPHdbUsername,'#',localStorage._lsPHdbLang,'#',localStorage._lsPHdbSubs,'#',localStorage._lsPHdbFrend,'#')
+    window.document.getElementsByClassName('searchActions')[0].appendChild(node2).style.background='white';
+    window.document.getElementsByClassName('searchActions')[0].appendChild(node2).innerHTML=(localStorage.idph,'fn:lsGet() - END')
     console.log('lsGet() ### END ##')
 };
 /* ################################################################################################### */
 
 // ########## START - ВИДАЛЕННЯ, ЯКЩО ПІДПИСАНИЙ. І ПІДПИСАННЯ ЯКЩО НОВИЙ.
 function subscribe(url,idph,_token) {
-    // смикаємо змінну з LS
+    window.document.getElementsByClassName('searchActions')[0].appendChild(node2).style.background='white';
+    window.document.getElementsByClassName('searchActions')[0].appendChild(node2).innerHTML=(localStorage.idph,'fn:subscribe() - START')
+    // смикаємо змінну АКТИВНОГО ID з LS (якщо вже такий є)
     idph = localStorage.idph;
     var lsPHdb_idph = 'lsPHdb_'+idph
-    console.log("401 subscribe(url,idph,_token) ### START");
+    console.log(localStorage.idph,'401 subscribe(url,idph,_token) ### START');
     //idph = localStorage.getItem('idph');
-    console.log("401 subscribe(url,idph,_token) ### LS ### ");
-    console.log("401 subscribe(url,idph,_token) ### LS ### ЯКЩО вже є в LS записане значення...");
-    console.log("401 subscribe(url,idph,_token) ### LS ### IF localStorage._lsPHdbIdph=[",localStorage._lsPHdbIdph,"] ДОРІВНЮЄ localStorage.idph=[",localStorage.idph,"]");
+    console.log(localStorage.idph,'401 subscribe(url,idph,_token) ### LS ### ');
+    console.log(localStorage.idph,'401 subscribe(url,idph,_token) ### LS ### ЯКЩО вже є в LS записане значення...');
+    console.log(localStorage.idph,'401 subscribe(url,idph,_token) ### LS ### IF localStorage._lsPHdbIdph=[',localStorage._lsPHdbIdph,'] ДОРІВНЮЄ localStorage.idph=[',localStorage.idph,']');
     // {"idph":"125534601","username":"vortexonline ","lang":"ru","subs":"true","frend":"na"} ДОРІВНЮЄ localStorage.idph= 125534601
     lsGet(idph);
+    // #### ЯКЩО елемент (який ми опрацьовуємо зараз) вже є в LS (вже збережений) = ДОРІВНЮЄ ID який ми зараз парсимо (дорівнює поточному елементу), то ми !_ВИДАЛЯЄМО_! цей елемент з DOM дерева.
     if (localStorage._lsPHdbIdph === localStorage.idph) {
     // if (localStorage._lsPHdbUsername === window.document.getElementsByClassName('username')[0].innerText) {
-        window.document.getElementsByClassName("searchActions")[0].appendChild(node2).style.background='red';
-        window.console.log('subscribe(url,idph,_token) ### ТАК, ДОРІВНЮЄ! --> ВИДАЛЯЄМО! ###')
+        window.document.getElementsByClassName('searchActions')[0].appendChild(node2).style.background='red';
+        window.document.getElementsByClassName('searchActions')[0].appendChild(node2).innerHTML=(localStorage.idph,'fn:subscribe() - ВИДАЛЯЄМО ЕЛЕМЕНТ, бо він вже в LS')
+        window.console.log(localStorage.idph,'subscribe(url,idph,_token) ### ТАК, ДОРІВНЮЄ! --> ВИДАЛЯЄМО! ###')
+        window.console.log(localStorage.idph,'subscribe(url,idph,_token) ### LS ###',localStorage._lsPHdbIdph,' = ',localStorage.idph,' # ',localStorage._lsPHdbUsername,'#')
         // window.console.log('subscribe(url,idph,_token) ### LS ###',localStorage._lsPHdbIdph,'#',localStorage._lsPHdbUsername,'#',localStorage._lsPHdbLang,'#',localStorage._lsPHdbSubs,'#',localStorage._lsPHdbFrend,'#')
-        // window.console.log("subscribe(url,idph,_token) ### LS ### якщо в LS вже стоїть помітка що ПІДПИСАНИЙ - відразу видаляємо! (без будь-яких запитів до сайта!)");
+        window.console.log(localStorage.idph,'subscribe(url,idph,_token) ### LS ### якщо в LS вже стоїть помітка що ПІДПИСАНИЙ - відразу видаляємо! (без будь-яких запитів до сайта!)');
+        // #### видаляємо елемент, бо він вже опрацьовувася раніше і його ІД вже є в ЛС
         window.document.getElementsByClassName('user-flag large-avatar')[0].parentNode.remove();
-        window.console.log("subscribe(url,idph,_token) ### LS ### ВИДАЛИЛИ :",localStorage._lsPHdbIdph,"=",localStorage._lsPHdbUsername);
+        window.document.getElementsByClassName('searchActions')[0].appendChild(node2).style.background='red';
+        window.document.getElementsByClassName('searchActions')[0].appendChild(node2).innerHTML=(localStorage.idph,'fn:subscribe() - УСПІШНО ВИДАЛИЛИ ЕЛЕМЕНТ, бо він вже був в LS')
+        window.console.log(localStorage.idph,'subscribe(url,idph,_token) ### LS ### ВИДАЛИЛИ :',localStorage._lsPHdbIdph,'=',localStorage._lsPHdbUsername);
         //sleep(7000);
     } else {
-    console.log('subscribe(url,idph,_token) ### НІ, НЕ ДОРІВНЮЄ! --> опрацьовуємо далі...')
-    // ЯКЩО ЦЕ БІЛИЙ - ВИДАЛЯЄМО ЙОГО (він іноді може зявлятись).
-    startG();
+        console.log('subscribe(url,idph,_token) ### НІ, НЕ ДОРІВНЮЄ! --> опрацьовуємо далі...')
+        // ЯКЩО ЦЕ БІЛИЙ - ВИДАЛЯЄМО ЙОГО (він іноді може зявлятись).
+        window.document.getElementsByClassName('searchActions')[0].appendChild(node2).style.background='red';
+        window.document.getElementsByClassName('searchActions')[0].appendChild(node2).innerHTML=(localStorage.idph,'ПЕРЕВІРЯЄМО на БІЛИЙ - START')
+        startG();
+        window.document.getElementsByClassName('searchActions')[0].appendChild(node2).style.background='white';
+        window.document.getElementsByClassName('searchActions')[0].appendChild(node2).innerHTML=(localStorage.idph,'ПЕРЕВІРИЛИ на БІЛИЙ, та видалили якщо він був.')
     }
     //localStorage.setItem('lSusername','0');
     //localStorage.setItem('lSsubscibertrue','0');
@@ -452,8 +541,9 @@ function subscribe(url,idph,_token) {
     //if (window.document.getElementsByClassName('buttonLabel')[1].innerText=='Подписаны') {
     var idClassSubscribe = '#avatarPopOverId'+idph+' .buttonLabel'
     if (window.document.querySelectorAll(idClassSubscribe)[1].innerText=='Подписаны') {
-        window.console.log("402 subscribe(url,idph,_token) ### якшо ПІДПИСАНІ ТО ВИДАЛЯЄМО ### ");
         window.document.getElementsByClassName("searchActions")[0].appendChild(node2).style.background='green';
+        window.document.getElementsByClassName('searchActions')[0].appendChild(node2).innerHTML=(localStorage.idph,'ВИДАЛЯЄМО ЕЛЕМЕНТ - бо ПІДПИСАНІ')
+        window.console.log("402 subscribe(url,idph,_token) ### якшо ПІДПИСАНІ ТО ВИДАЛЯЄМО ### ");
         //var lSusername = localStorage.setItem('lSusername', document.getElementsByClassName('username')[0].innerText);
         //var lSsubscibertrue = localStorage.setItem('lSsubscibertrue', document.getElementsByClassName('buttonLabel')[1].innerText);
         //var lSsubscibertrueNum = localStorage.setItem('lSsubscibertrueNum',document.getElementsByClassName('subscribers-count')[0].innerText);
@@ -486,21 +576,22 @@ function subscribe(url,idph,_token) {
 //deleteOldModalWindowUser();
         // то переходимо до функції Підписки
         if (document.getElementsByClassName('buttonLabel')[1].innerText=='Подписаться') {
-            window.document.getElementsByClassName("searchActions")[0].appendChild(node2).style.background='orange';
-            console.log("433 subscribe(url,idph,_token) ### ВІКНО: IF ПІДПИСАТИСЬ ==> ORANGE/ADD!");
+            window.document.getElementsByClassName("searchActions")[0].appendChild(node2).style.background='green';
+            window.document.getElementsByClassName('searchActions')[0].appendChild(node2).innerHTML=(localStorage.idph,'subscribe: надсилаємо запит на підписку')
+            console.log("433 subscribe(url,idph,_token) ### ВІКНО: IF ПІДПИСАТИСЬ ==> GREEN/ADD!");
             // document.getElementsByClassName('user-flag large-avatar')[0].parentNode.style.background='orange';
             // document.getElementsByClassName('user-flag large-avatar')[1].innerText
             // document.getElementsByClassName('avatarPopOver')[0].style.display
             document.getElementsByClassName('user-flag large-avatar')[0].parentNode.style.background='orange';
             document.getElementsByClassName('avatarPopOver')[0].style.display='block';
             // elementT2[0].parentNode.style.display='none';
-            console.log("434 subscribe(url,idph,_token) ### ВІКНО: IF ПІДПИСАТИСЬ ==> ORANGE/ADD!");
+            console.log("434 subscribe(url,idph,_token) ### ВІКНО: IF ПІДПИСАТИСЬ ==> GREEN/ADD!");
             console.log("435 subscribe(url,idph,_token) ### якшо НЕ ПІДПИСАНІ ТО ### ПІДПИСАЛИСЬ");
             console.log("436 subscribe(url,idph,_token) ### якшо НЕ ПІДПИСАНІ ТО ### ПІДПИСАЛИСЬ");
             console.log("437 subscribe(url,idph,_token) ### якшо НЕ ПІДПИСАНІ ТО ### ПІДПИСАЛИСЬ");
             console.log("438 subscribe(url,idph,_token) ### якшо НЕ ПІДПИСАНІ ТО ### ПІДПИСАЛИСЬ");
             console.log("439 subscribe(url,idph,_token) ### якшо НЕ ПІДПИСАНІ ТО ### ВІКНО: IF ПІДПИСАТИСЬ ==> ORANGE/ADD!");
-            sleep(5000);
+            sleep(1000);
             // підписатись
             // ...
                 // формуємо запит для надсилання на сервер з додаванням в друзі і/або підпискою на Юзера.
@@ -518,6 +609,8 @@ function subscribe(url,idph,_token) {
         };
     };
     console.log("420 subscribe(url,idph,_token) ### END");
+    window.document.getElementsByClassName('searchActions')[0].appendChild(node2).style.background='white';
+    window.document.getElementsByClassName('searchActions')[0].appendChild(node2).innerHTML=(localStorage.idph,'fn:subscribe() = END')
 };
 // ########## END - ВИДАЛЕННЯ, ЯКЩО ПІДПИСАНИЙ. І ПІДПИСАННЯ ЯКЩО НОВИЙ.
 /* ################################################################################################### */
@@ -610,12 +703,16 @@ function startF(){
     var elementPremiumWhiteLength = elementPremiumWhite.length
     for (var f = 0; f < elementPremiumWhiteLength; f++) {
         // знаходити і видаляти батьківські ЛІ з цієї вибірки.
-        // це БІЛІ ПРЕМІУМ ЮЗЕРИ - вони не додаються, тому вони не потрібні.
+        // перевір, чи це БІЛІ ПРЕМІУМ ЮЗЕРИ - вони не додаються, тому вони не потрібні.
         // <span class="userLink hiddenModalBoxWidget marked clearfix">
         if (elementPremiumWhite) {
+            window.document.getElementsByClassName('searchActions')[0].appendChild(node2).style.background='red';
+            window.document.getElementsByClassName('searchActions')[0].appendChild(node2).innerHTML=(localStorage.idph,' F ПЕРЕВІРЯЄМО на БІЛИЙ - процес видалення...')
             console.log ('F - DELETE PremiumWhite', [f], ' із ', elementPremiumWhiteLength-1);
             elementPremiumWhite[0].parentNode.parentNode.remove();
         } else {
+            window.document.getElementsByClassName('searchActions')[0].appendChild(node2).style.background='white';
+            window.document.getElementsByClassName('searchActions')[0].appendChild(node2).innerHTML=(localStorage.idph,' F ПЕРЕВІРЯЄМО на БІЛИЙ - цей був не білий...')
             console.log ('F - NONE PremiumWhite');
         };
     };
@@ -631,32 +728,18 @@ function startG(){
         // це БІЛІ ЮЗЕРИ - вони не додаються, тому вони не потрібні.
         // <span class="userLink hiddenModalBoxWidget marked clearfix">
         if (elementWhite) {
+            window.document.getElementsByClassName('searchActions')[0].appendChild(node2).style.background='red';
+            window.document.getElementsByClassName('searchActions')[0].appendChild(node2).innerHTML=(localStorage.idph,' G ПЕРЕВІРЯЄМО на БІЛИЙ - процес видалення...')
             console.log ('G - DELETE White', [g], ' із ', elementWhiteLength-1);
             elementWhite[0].parentNode.parentNode.remove();
         } else {
+            window.document.getElementsByClassName('searchActions')[0].appendChild(node2).style.background='white';
+            window.document.getElementsByClassName('searchActions')[0].appendChild(node2).innerHTML=(localStorage.idph,' G ПЕРЕВІРЯЄМО на БІЛИЙ - цей був не білий...')
             console.log ('G - NONE PremiumWhite');
         };
     };
 };
 // ########## END G
-// ########## START H
-function startH(){
-    console.log('H - START');
-    var elementWhite = window.document.querySelectorAll('div[data-disable-popover="1"]')
-    var elementWhiteLength = elementWhite.length
-    for (var h = 0; h < elementWhiteLength; h++) {
-        // знаходити і видаляти батьківські ЛІ з цієї вибірки.
-        // це БІЛІ ЮЗЕРИ - вони не додаються, тому вони не потрібні.
-        // <span class="userLink hiddenModalBoxWidget marked clearfix">
-        if (elementWhite) {
-            console.log ('H - DELETE White', [h], ' із ', elementWhiteLength-1);
-            elementWhite[0].parentNode.parentNode.remove();
-        } else {
-            console.log ('H - NONE PremiumWhite');
-        };
-    };
-};
-// ########## END H
 /* ################################################################################################### */
 // ########## START R0
 function startR0(){
