@@ -176,13 +176,21 @@ function RUN3() {
                 window.document.getElementsByClassName('searchActions')[0].appendChild(node2).innerHTML=(localStorage.idph,' 006 КНОПКУ ВИМКНЕНО')
                 clearInterval(loop);
             }else if(count === _users.length){
-                console.log('007 start() ### Перевірка на те, чи закінчився вже ВЕСЬ список, якщо закінчився, то автоматично клікається кнопка _Наступна_Сторінка_');
+                console.log('007.1 start() ### Перевірка на те, чи закінчився вже ВЕСЬ список, якщо закінчився, то автоматично клікається кнопка _Наступна_Сторінка_');
                 // Перевірка на те, чи закінчився вже ВЕСЬ список, якщо закінчився, то автоматично клікається кнопка "Наступна Сторінка"
                 window.document.getElementsByClassName('searchActions')[0].appendChild(node2).style.background='white';
                 window.document.getElementsByClassName('searchActions')[0].appendChild(node2).innerHTML=(localStorage.idph,' 008 список ЗАКІНЧИВСЯ. Переходимо на наступну сторінку')
                 count = 0;
-                console.log('008 start() ###'+iteration+'### Переходимо на наступну сторінку');
+                console.log('008.1 start() ###'+iteration+'### Переходимо на наступну сторінку');
                 document.getElementsByClassName('page_next')[0].childNodes[0].click();
+            }else if (document.getElementsByClassName('page_next')[0].childNodes[0] != true){
+                console.log('007.2 stop ### Якщо закінчився ВЕСЬ список і нема наступної сторінки, то ЗУПИНЯЄМО скрипт');
+                // Перевірка на те, чи закінчився вже ВЕСЬ список, якщо закінчився, то ЗУПИНЯЄМО скрипт"
+                window.document.getElementsByClassName('searchActions')[0].appendChild(node2).style.background='white';
+                window.document.getElementsByClassName('searchActions')[0].appendChild(node2).innerHTML=('',localStorage.idph,' АВТОЗУПИНКА. Весь список ЗАКІНЧИВСЯ. Обєктів нема.')
+                count = 0;
+                console.log('008.2 start() ### АВТОЗУПИНКА ### Весь список ЗАКІНЧИВСЯ. Обєктів нема.');
+                clearInterval(loop);
             }else{
                 window.document.getElementsByClassName('searchActions')[0].appendChild(node2).style.background='white';
                 window.document.getElementsByClassName('searchActions')[0].appendChild(node2).innerHTML=(localStorage.idph,' 010 ОТРИМАННЯ цифрового ID Юзера')
@@ -338,7 +346,7 @@ function elementModalWindowUser(idph){
     request.send();
     // УВАГА!
     // технологічна пауза не менше 5000, бо від сервера не встигає надійти відповідь, і це ламає алгоритм!
-    sleep(10000);
+    sleep(5000);
     console.log('349 elementModalWindowUser(idph) ### END ###');
 };
 sleep(1);
